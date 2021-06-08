@@ -30,7 +30,7 @@ def parse_response(resp: dict) -> dict:
         for game in row.get('games'):
             game_date = arrow.get(game.get('gameDate')).to(LOCAL_TZ)
             d['day_of_week'] = game_date.format('ddd')
-            d['game_time_pacific'] = game_date.format('hh:mm A')
+            d['game_time_local'] = game_date.format('hh:mm A')
 
             d['is_home_game'] = game.get('venue').get('id') == VENUE_ID
             d['venue'] = game.get('venue').get('name')
