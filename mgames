@@ -22,19 +22,22 @@ def parse_date(s: str) -> str:
 
 def parse_response(resp: dict) -> dict:
     """Trim down full response"""
-    games = []
+    games, i = [], 0
     for row in resp.get('dates'):
-        d = {}
-        d['game_date'] = row.get('date')
-
         for game in row.get('games'):
+            i += 1
+            d = {}
+
+            d['game_number'] = i
+            d['game_date'] = row.get('date')
+
             game_date = arrow.get(game.get('gameDate')).to(LOCAL_TZ)
             d['day_of_week'] = game_date.format('ddd')
             d['game_time_local'] = game_date.format('hh:mm A')
 
             d['is_home_game'] = game.get('venue').get('id') == VENUE_ID
             d['venue'] = game.get('venue').get('name')
-            d['game_number'] = game.get('seriesGameNumber')
+            d['series_number'] = game.get('seriesGameNumber')
             d['day_night'] = game.get('dayNight')
 
             teams = game.get('teams')
@@ -77,6 +80,15 @@ if __name__ == '__main__':
 
     data = get_data(args.start, args.end)
     games = data.get('games')
+
+    # add home game number count
+    i = 1
+    for game in games:
+        if game.get('is_home_game'):
+            game['home_game_number'] = i
+            i += 1
+        else:
+            game['home_game_number'] = None
 
     print(f'Total games found: {data.get("total_games"):,}')
     print(f'Games in progress: {data.get("in_progress"):,}')
